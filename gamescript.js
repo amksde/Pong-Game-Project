@@ -1,110 +1,101 @@
+// select canvas element
 const canvas = document.getElementById("pong");
-const ctx = canvas.getContext("2d");
 
-//user and computer racket properties
-const usr = {
-    x: 0,
-    y: canvas.height / 2 - 100,
-    width: 10,
-    height: 100,
-    color: "WHITE",
-    score: 0
+// getContext of canvas = methods and properties to draw and do a lot of thing to the canvas
+const ctx = canvas.getContext('2d');
+
+let timeLeft = {
+    minutes : "00",
+    seconds : "10"
 }
 
-const cmp = {
-    x: canvas.width - 10,
-    y: canvas.height / 2 - 100,
-    width: 10,
-    height: 100,
-    color: "WHITE",
-    score: 0
-}
-
-//we can take ball color and radius to be user input
+// Ball object
 const ball = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: 10,
-    color: "White",
-
-    //speed anf velocity along x and y axis
-    speed :49,
-    velx : 25,
-    vely : 25
+    x : canvas.width/2,
+    y : canvas.height/2,
+    radius : 10,
+    velocityX : 10,
+    velocityY : 10,
+    speed : 14,
+    color : "WHITE"
 }
 
-//Function to draw a rectangle
-function drawRect(x,y,w,h,color) {
+// User Paddle
+const user = {
+    x : 0, // left side of canvas
+    y : (canvas.height - 100)/2, // -100 the height of paddle
+    width : 10,
+    height : 100,
+    score : 0,
+    color : "WHITE"
+}
+
+// COM Paddle
+const com = {
+    x : canvas.width - 10, // - width of paddle
+    y : (canvas.height - 100)/2, // -100 the height of paddle
+    width : 10,
+    height : 100,
+    score : 0,
+    color : "WHITE"
+}
+
+// NET
+const net = {
+    x : (canvas.width - 2)/2,
+    y : 0,
+    height : 10,
+    width : 2,
+    color : "WHITE"
+}
+
+// draw a rectangle, will be used to draw paddles
+function drawRect(x, y, w, h, color){
     ctx.fillStyle = color;
-    ctx.fillRect(x,y,w,h);
+    ctx.fillRect(x, y, w, h);
 }
 
-drawRect(0, 0, 1100, 500, "Black");
-
-//function to draw a circle
-function drawCircle(x,y,r,color) {
+// draw circle, will be used to draw the ball
+function drawArc(x, y, r, color){
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2, false);
+    ctx.arc(x,y,r,0,Math.PI*2,true);
     ctx.closePath();
     ctx.fill();
 }
 
-//function to draw a text block
-function  drawTextBlock(text, x, y, color) {
-    ctx.fillStyle = color;
-    ctx.font = "50px serif";
-    ctx.fillText(text, x, y);
+// listening to the mouse
+canvas.addEventListener("mousemove", getMousePos);
+
+function getMousePos(evt){
+    let rect = canvas.getBoundingClientRect();
+    
+    user.y = evt.clientY - rect.top - user.height/2;
 }
 
-//for net piece
-const netpiece = {
-    x: canvas.width / 2 - 1,
-    y: 0,
-    width: 2,
-    height: 10,
-    color: "yellow"
+// when COM or USER scores, we reset the ball
+function resetBall(){
+    ball.x = canvas.width/2;
+    ball.y = canvas.height/2;
+    ball.velocityX = -ball.velocityX;
+    ball.speed = 14;
 }
 
-function createNet() {
-    for (let i = 0; i <= canvas.height; i += 14) {
-        drawRect(netpiece.x, netpiece.y + i, netpiece.width, netpiece.height, netpiece.color);
+// draw the net
+function drawNet(){
+    for(let i = 0; i <= canvas.height; i+=13){
+        drawRect(net.x, net.y + i, net.width, net.height, net.color);
     }
 }
 
-//create the whole set up
-function rendering() {
-    //playing table
-    drawRect(0, 0, 1100, 500, "Black");
-    drawCircle(0, 0, 20, "Green");
-    drawCircle(0, canvas.height, 20, "Green");
-    drawCircle(canvas.width, 0, 20, "Green");
-    drawCircle(canvas.width, canvas.height, 20, "Green");
-
-    //Score board
-    drawTextBlock(usr.score, canvas.width / 4, canvas.height / 7, "White");
-    drawTextBlock(cmp.score, 3 * canvas.width / 4, canvas.height / 7, "White");
-
-    //Net
-    createNet();
-
-    //player bats
-    drawRect(usr.x, usr.y, usr.width, usr.height, usr.color);
-    drawRect(cmp.x, cmp.y, cmp.width, cmp.height, cmp.color);
-
-    //And Ball
-    drawCircle(ball.x, ball.y, ball.radius, ball.color);
+// draw text
+function drawText(text,x,y){
+    ctx.fillStyle = "#FFF";
+    ctx.font = "75px serif";
+    ctx.fillText(text, x, y);
 }
 
-//reset ball
-function resetBall()
-{
-    ball.x = canvas.width/2;
-    ball.y = canvas.height/2;
-
-    ball.speed = 49;
-    ball.velx = -ball.velx;
-}
+// collision detection
 function collision(b,p){
     p.top = p.y;
     p.bottom = p.y + p.height;
@@ -119,37 +110,41 @@ function collision(b,p){
     return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
 }
 
+// update function, the function that does all calculations
 function update(){
     
     // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
     if( ball.x - ball.radius < 0 ){
-        cmp.score++;
+        com.score++;
+        // comScore.play();
         resetBall();
     }else if( ball.x + ball.radius > canvas.width){
-        usr.score++;
+        user.score++;
+        // userScore.play();
         resetBall();
     }
     
     // the ball has a velocity
-    ball.x += ball.velx;
-    ball.y += ball.vely;
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
     
     // computer plays for itself, and we must be able to beat it
     // simple AI
-    cmp.y += (ball.y - (cmp.y + cmp.height/2));
+    com.y += ((ball.y - (com.y + com.height/2)))*0.1;
     
     // when the ball collides with bottom and top walls we inverse the y velocity.
     if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
-        ball.vely = -ball.vely;
-        
+        ball.velocityY = -ball.velocityY;
+        // wall.play();
     }
     
     // we check if the paddle hit the user or the com paddle
-    let player = (ball.x + ball.radius < canvas.width/2) ? usr : cmp;
+    let player = (ball.x + ball.radius < canvas.width/2) ? user : com;
     
     // if the ball hits a paddle
     if(collision(ball,player)){
-        
+        // play sound
+        //hit.play();
         // we check where the ball hits the paddle
         let collidePoint = (ball.y - (player.y + player.height/2));
         // normalize the value of collidePoint, we need to get numbers between -1 and 1.
@@ -160,32 +155,120 @@ function update(){
         // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
         // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
         // Math.PI/4 = 45degrees
-        let angle = (Math.PI/4) * collidePoint;
+        let angleRad = (Math.PI/4) * collidePoint;
         
         // change the X and Y velocity direction
         let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
-        ball.velx = direction * ball.speed * Math.cos(angle);
-        ball.vely = ball.speed * Math.sin(angle);
+        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+        ball.velocityY = ball.speed * Math.sin(angleRad);
         
         // speed up the ball everytime a paddle hits it.
         ball.speed += 0.1;
     }
 }
 
-
-function game() {
-    rendering();
-    update();
+// render function, the function that does al the drawing
+function render(){
+    
+    // clear the canvas
+    drawRect(0, 0, canvas.width, canvas.height, "#000");
+    
+    // draw the user score to the left
+    drawText(user.score,canvas.width/4,canvas.height/5);
+    
+    // draw the COM score to the right
+    drawText(com.score,3*canvas.width/4,canvas.height/5);
+    
+    // draw the net
+    drawNet();
+    
+    // draw the user's paddle
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    
+    // draw the COM's paddle
+    drawRect(com.x, com.y, com.width, com.height, com.color);
+    
+    // draw the ball
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
 }
 
-//loop
-const fps = 50;
-setInterval(game, 1000 / fps);
-
-
-canvas.addEventListener("mousemove", movePaddle);
-function movePaddle(evt)
+function renderDefaults()
 {
-    let rect = canvas.getBoundingClientRect();
-    usr.y = evt.clientY - rect.top - (usr.height/2);
+    user.score = 0;
+    com.score = 0;
+    user.x = 0;
+    user.y = (canvas.height - 100)/2;
+    com.x = canvas.width - 10;
+    com.y = (canvas.height - 100)/2;
+    ball.x = canvas.width/2;
+    ball.y = canvas.height/2;
+
 }
+function game(){
+    update();
+    render();
+}
+
+function reduceTime()
+{
+    if(timeLeft.minutes=="00" && timeLeft.seconds=="00")
+    {
+        if(user.score>com.score)
+        {
+            clearInterval(loop);
+            clearInterval(loop2);
+            renderDefaults();
+            render();
+            alert("You Won!")
+        }
+        else if(user.score<com.score)
+        {
+            clearInterval(loop);
+            clearInterval(loop2);
+            renderDefaults();
+            render();
+            alert("Sorry, you lost!");
+        }
+        else
+        {
+            clearInterval(loop);
+            clearInterval(loop2);
+            renderDefaults();
+            render();
+            alert("It's a tie!");
+        }
+    }
+    else
+    {
+        if(timeLeft.seconds=="00")
+        {
+            let mintemp = parseInt(timeLeft.minutes);
+            mintemp--;
+            timeLeft.minutes = "0"+mintemp.toString();
+            timeLeft.seconds = "60";
+        }
+
+        let temp = parseInt(timeLeft.seconds);
+        temp--;
+        if(temp<10)
+        {
+            timeLeft.seconds = "0"+temp.toString();
+        }
+        else
+        {
+            timeLeft.seconds = temp.toString();
+        }
+        displayTime();
+    }
+}
+
+function displayTime()
+{
+    document.getElementById("timer").textContent = timeLeft.minutes+":"+timeLeft.seconds;
+}
+// number of frames per second
+let framePerSecond = 50;
+
+//call the game function 50 times every 1 Sec
+let loop = setInterval(game,1000/framePerSecond);
+let loop2= setInterval(reduceTime,1000);

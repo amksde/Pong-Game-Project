@@ -28,9 +28,9 @@ const ball = {
     color: "White",
 
     //speed anf velocity along x and y axis
-    speed : 7,
-    velx : 5,
-    vely : 5
+    speed :49,
+    velx : 25,
+    vely : 25
 }
 
 //Function to draw a rectangle
@@ -102,70 +102,77 @@ function resetBall()
     ball.x = canvas.width/2;
     ball.y = canvas.height/2;
 
-    ball.speed = 7;
+    ball.speed = 49;
     ball.velx = -ball.velx;
 }
-function update() {
+function collision(b,p){
+    p.top = p.y;
+    p.bottom = p.y + p.height;
+    p.left = p.x;
+    p.right = p.x + p.width;
     
-    //program to control the cmp racket
-    if (ball.x-ball.radius<0) {
+    b.top = b.y - b.radius;
+    b.bottom = b.y + b.radius;
+    b.left = b.x - b.radius;
+    b.right = b.x + b.radius;
+    
+    return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
+}
+
+function update(){
+    
+    // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
+    if( ball.x - ball.radius < 0 ){
         cmp.score++;
         resetBall();
-    }
-    else if (ball.x+ball.radius>canvas.width) {
+    }else if( ball.x + ball.radius > canvas.width){
         usr.score++;
         resetBall();
     }
     
+    // the ball has a velocity
     ball.x += ball.velx;
     ball.y += ball.vely;
-
-    let cmpLevel = 0.1;
-    cmp.y += (ball.y-(cmp.y+(cmp.height/2)))*cmpLevel;
-    if ((ball.y+ball.radius > canvas.height) || (ball.y-ball.radius <0)) {
+    
+    // computer plays for itself, and we must be able to beat it
+    // simple AI
+    cmp.y += (ball.y - (cmp.y + cmp.height/2));
+    
+    // when the ball collides with bottom and top walls we inverse the y velocity.
+    if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
         ball.vely = -ball.vely;
+        
     }
-    let player;
-    if (ball.x+ball.radius<(canvas.width/2)) {
-        player = usr;
+    
+    // we check if the paddle hit the user or the com paddle
+    let player = (ball.x + ball.radius < canvas.width/2) ? usr : cmp;
+    
+    // if the ball hits a paddle
+    if(collision(ball,player)){
+        
+        // we check where the ball hits the paddle
+        let collidePoint = (ball.y - (player.y + player.height/2));
+        // normalize the value of collidePoint, we need to get numbers between -1 and 1.
+        // -player.height/2 < collide Point < player.height/2
+        collidePoint = collidePoint / (player.height/2);
+        
+        // when the ball hits the top of a paddle we want the ball, to take a -45degees angle
+        // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
+        // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
+        // Math.PI/4 = 45degrees
+        let angle = (Math.PI/4) * collidePoint;
+        
+        // change the X and Y velocity direction
+        let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
+        ball.velx = direction * ball.speed * Math.cos(angle);
+        ball.vely = ball.speed * Math.sin(angle);
+        
+        // speed up the ball everytime a paddle hits it.
+        ball.speed += 0.1;
     }
-    else
-    {
-        player = cmp;
-    }
-    if (collision(ball, player)) {
-        //cldpoint = point of collision
-         let cldpoint = (ball.y - (player.y + player.height/2));
-
-         //normalization
-         cldpoint = cldpoint/(player.height/2);
-
-         //angle is in radian
-         let angle = (Math.PI/4)* cldpoint;
-         let direction = (ball.x+ball.radius<(canvas.width/2))?1:-1;
-
-         //change the velocity of the ball
-         ball.velx = direction*ball.speed*Math.cos(angle);
-         ball.vely = ball.speed*Math.sin(angle);
-         ball.speed += 0.5;
-    }
-
 }
 
-//game initiation
-function collision(b, p) {
-    p.top = p.y;
-    p.bottom = p.y + p.height;
-    p.left = p.x;
-    p.right = p.y + p.width;
 
-    b.top = b.y - b.radius;
-    b.bottom = b.y + b.radius;
-    b.left = b.x - b.radius;
-    b.right = b.y + b.radius;
-
-    return (b.right > p.left) && (b.top < p.bottom) && (b.left < p.right) && (b.bottom > p.top);
-}
 function game() {
     rendering();
     update();

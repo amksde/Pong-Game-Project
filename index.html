@@ -2,26 +2,35 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>
             Ping Pong Game
         </title>
-        <style>
-            #pong {
-                border: 2px solid #FFF;
-                position: absolute;
-                margin: auto;
-                top: 0;
-                right: 0;
-                left: 0;
-                bottom: 0;
-            }
-        </style>
+        <link rel="stylesheet" href="pongstyle.css">
     </head>
-    <body style="background-color: rgb(104, 101, 101);">
+    <!-- the default background is of grey color -->
+    <body style="background-color: rgb(48, 48, 48);">
         <canvas id="pong" width="1000" height="500"></canvas>
-        <script src="gamescript.js"></script>
-        <div id="timer" style="margin-left: 600px; font-size: 2em; color: yellow">
-            TIME LEFT
+        <div id="timer" style="font-size: 2em; display: inline;">
+            <b>All The Best!</b>
         </div>
+        <div id="themes" style="display: flex; flex-direction: column; margin-top: 150px; margin-bottom: 0em;">
+            <div>
+                <button id="halloween" onclick="htheme()">Halloween Theme</button>
+            </div>
+            <div>
+                <button id="tennis" onclick="ttheme()">Tennis Theme</button>
+            </div>
+            <div>
+                <button id="sea" onclick="stheme()">Sea Shore Theme</button>            
+            </div>
+            <div>
+                <button id="classic" onclick="ctheme()">Classic Theme</button>
+            </div>
+        </div>
+        <!-- the following button is clicked to start the game -->
+        <button id="start" onclick="strtgame()">Start Game</button>
+        <!-- script source -->
+        <script src="gamescript.js"></script>
     </body>
 </html>

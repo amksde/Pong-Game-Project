@@ -1,6 +1,7 @@
 # Pong Game Project
 
 ## Project Components
+<hr>
 ### Layout
 
 Our design included a **rectangular playing court** with 2 paddles, one controlled by the user using a **mouse** and the other moved by the computer itself. For the court, we used an HTML canvas element which we coloured black because it contrasted well with the red colored ball.
@@ -22,7 +23,7 @@ A **scoreboard** has been provided at the top of each column of the court which 
 
 The whole game has been beautified with extensive CSS wherever required. Many elements have dynamic CSS which is changed by the Javascript code.
 
-### Gameplay and Execution
+## Gameplay and Execution
 <hr>
 When the game loads, a grey screen is presented to the player. He/She has the option to change the theme then and later on too.
 
